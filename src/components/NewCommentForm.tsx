@@ -1,8 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export const NewCommentForm: React.FC = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [comment, setComment] = useState('');
+  const [errorName, setErrorName] = useState('');
+  const [errorEmail, setErrorEmail] = useState('');
+  const [errorComment, setErrorComment] = useState('');
+
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorName('');
+    setName(event.target.value);
+  };
+
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorEmail('');
+    setEmail(event.target.value);
+  };
+
+  const handleCommentChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setErrorComment('');
+    setComment(event.target.value);
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
+
   return (
-    <form data-cy="NewCommentForm">
+    <form data-cy="NewCommentForm" onSubmit={handleSubmit}>
       <div className="field" data-cy="NameField">
         <label className="label" htmlFor="comment-author-name">
           Author Name
@@ -15,6 +43,8 @@ export const NewCommentForm: React.FC = () => {
             id="comment-author-name"
             placeholder="Name Surname"
             className="input is-danger"
+            value={name}
+            onChange={handleNameChange}
           />
 
           <span className="icon is-small is-left">
@@ -46,6 +76,8 @@ export const NewCommentForm: React.FC = () => {
             id="comment-author-email"
             placeholder="email@test.com"
             className="input is-danger"
+            value={email}
+            onChange={handleEmailChange}
           />
 
           <span className="icon is-small is-left">
@@ -76,6 +108,8 @@ export const NewCommentForm: React.FC = () => {
             name="body"
             placeholder="Type comment here"
             className="textarea is-danger"
+            value={comment}
+            onChange={handleCommentChange}
           />
         </div>
 
