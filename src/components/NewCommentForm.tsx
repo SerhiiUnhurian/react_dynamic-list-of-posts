@@ -71,7 +71,7 @@ export const NewCommentForm: React.FC<Props> = ({
     return isValid;
   };
 
-  const handleCleare = () => {
+  const handleClear = () => {
     setCommentData({
       name: '',
       email: '',
@@ -87,14 +87,9 @@ export const NewCommentForm: React.FC<Props> = ({
     event.preventDefault();
 
     if (validateForm()) {
-      createComment(selectedPost.id, commentData)
-        .then(() => {
-          commentData.body = '';
-        })
-        .catch(error => {
-          // setErrorMessage('Failed to submit comment');
-          throw error;
-        });
+      createComment(selectedPost.id, commentData).then(() => {
+        commentData.body = '';
+      });
     }
   };
 
@@ -220,7 +215,7 @@ export const NewCommentForm: React.FC<Props> = ({
           <button
             type="reset"
             className="button is-link is-light"
-            onClick={handleCleare}
+            onClick={handleClear}
           >
             Clear
           </button>
