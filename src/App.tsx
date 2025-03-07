@@ -47,6 +47,7 @@ export const App = () => {
   useEffect(() => {
     setLoading(true);
     setPostsError('');
+    setSelectedPost(null);
 
     if (selectedUser) {
       getUserPosts(selectedUser.id)
@@ -136,21 +137,25 @@ export const App = () => {
                 {loading && <Loader />}
 
                 {postsError && (
-                  <div className="notification is-danger" data-cy="postsError">
+                  <div
+                    className="notification is-danger"
+                    data-cy="PostsLoadingError"
+                  >
                     Something went wrong!
                   </div>
                 )}
 
-                {userPosts?.length === 0 && (
+                {userPosts?.length === 0 && !loading && (
                   <div className="notification is-warning" data-cy="NoPostsYet">
                     No posts yet
                   </div>
                 )}
 
-                {userPosts !== null && userPosts?.length !== 0 && (
+                {userPosts !== null && userPosts?.length !== 0 && !loading && (
                   <PostsList
                     userPosts={userPosts}
                     setSelectedPost={setSelectedPost}
+                    selectedPost={selectedPost}
                   />
                 )}
               </div>
