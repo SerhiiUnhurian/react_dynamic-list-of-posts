@@ -12,8 +12,8 @@ import { useEffect, useState } from 'react';
 import { User } from './types/User';
 import { getUserPosts, getUsers } from './api/users';
 import { Post } from './types/Post';
-import { getPostComments } from './api/comments';
-import { Comment } from './types/Comment';
+import { createAComment, getPostComments } from './api/comments';
+import { Comment, CommentData } from './types/Comment';
 
 export const App = () => {
   const [users, setUsers] = useState<User[] | null>(null);
@@ -21,15 +21,14 @@ export const App = () => {
   const [userPosts, setUserPosts] = useState<Post[] | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [commentFormOpened, setCommentFormOpened] = useState(false);
-  const [selectedPostComments, setSelectedPostComments] = useState<
-    Comment[] | null
-  >(null);
+  const [postComments, setPostComments] = useState<Comment[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState('');
-  const [postsLoadingError, setPostsLoadingError] = useState('');
-  const [commentsLoadingError, setCommentsLoadingError] = useState('');
+  const [postsError, setPostsError] = useState('');
+  const [commentsError, setCommentsError] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -48,13 +47,13 @@ export const App = () => {
 
   useEffect(() => {
     setLoading(true);
-    setPostsLoadingError('');
+    setPostsError('');
 
     if (selectedUser) {
       getUserPosts(selectedUser.id)
         .then(setUserPosts)
         .catch(error => {
-          setPostsLoadingError("Unable to load user's posts");
+          setPostsError("Unable to load user's posts");
           throw error;
         })
         .finally(() => setLoading(false));
@@ -67,9 +66,9 @@ export const App = () => {
 
     if (selectedPost !== null) {
       getPostComments(selectedPost.id)
-        .then(setSelectedPostComments)
+        .then(setPostComments)
         .catch(error => {
-          setCommentsLoadingError('Unable to load post commnets');
+          setCommentsError('Unable to load post commnets');
           throw error;
         })
         .finally(() => {
@@ -77,6 +76,29 @@ export const App = () => {
         });
     }
   }, [selectedPost]);
+
+  const createComment = (
+    postId: number,
+    newComment: CommentData,
+  ): Promise<Comment> => {
+    setIsSubmitting(true);
+
+    return createAComment(postId, newComment)
+      .then(createdComment => {
+        setPostComments(prevComments =>
+          prevComments ? [...prevComments, createdComment] : [createdComment],
+        );
+
+        return createdComment;
+      })
+      .catch(error => {
+        setErrorMessage('Unable to create a comment');
+        throw error;
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
+  };
 
   return (
     <main className="section">
@@ -99,11 +121,8 @@ export const App = () => {
 
                 {loading && <Loader />}
 
-                {postsLoadingError && (
-                  <div
-                    className="notification is-danger"
-                    data-cy="PostsLoadingError"
-                  >
+                {postsError && (
+                  <div className="notification is-danger" data-cy="postsError">
                     Something went wrong!
                   </div>
                 )}
@@ -140,11 +159,13 @@ export const App = () => {
               {selectedPost !== null && (
                 <PostDetails
                   selectedPost={selectedPost}
-                  selectedPostComments={selectedPostComments}
+                  postComments={postComments}
                   commentsLoading={commentsLoading}
-                  commentsLoadingError={commentsLoadingError}
+                  commentsError={commentsError}
                   commentFormOpened={commentFormOpened}
                   setCommentFormOpened={setCommentFormOpened}
+                  createComment={createComment}
+                  isSubmitting={isSubmitting}
                 />
               )}
             </div>

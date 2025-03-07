@@ -3,24 +3,28 @@ import { Loader } from './Loader';
 import { NewCommentForm } from './NewCommentForm';
 import { Post } from '../types/Post';
 import { CommentComponent } from './CommentComponent';
-import { Comment } from '../types/Comment';
+import { Comment, CommentData } from '../types/Comment';
 
 type Props = {
   selectedPost: Post;
-  selectedPostComments: Comment[] | null;
+  postComments: Comment[] | null;
   commentsLoading: boolean;
-  commentsLoadingError: string;
+  commentsError: string;
   commentFormOpened: boolean;
   setCommentFormOpened: (arg: boolean) => void;
+  createComment: (postId: number, newComment: CommentData) => Promise<Comment>;
+  isSubmitting: boolean;
 };
 
 export const PostDetails: React.FC<Props> = ({
   selectedPost,
-  selectedPostComments,
+  postComments,
   commentsLoading,
-  commentsLoadingError,
+  commentsError,
   commentFormOpened,
   setCommentFormOpened,
+  createComment,
+  isSubmitting,
 }) => {
   return (
     <div className="content" data-cy="PostDetails">
@@ -38,29 +42,29 @@ export const PostDetails: React.FC<Props> = ({
             <Loader />
           ) : (
             <>
-              {commentsLoadingError && (
+              {commentsError && (
                 <div className="notification is-danger" data-cy="CommentsError">
                   Something went wrong
                 </div>
               )}
 
-              {selectedPostComments?.length === 0 && (
+              {postComments?.length === 0 && (
                 <p className="title is-4" data-cy="NoCommentsMessage">
                   No comments yet
                 </p>
               )}
 
-              {selectedPostComments?.length !== 0 && selectedPostComments && (
+              {postComments?.length !== 0 && postComments && (
                 <>
                   <p className="title is-4">Comments:</p>
 
-                  {selectedPostComments.map(comment => (
+                  {postComments.map(comment => (
                     <CommentComponent comment={comment} key={comment.id} />
                   ))}
                 </>
               )}
 
-              {!commentsLoadingError && !commentFormOpened && (
+              {!commentsError && !commentFormOpened && (
                 <button
                   data-cy="WriteCommentButton"
                   type="button"
@@ -74,7 +78,13 @@ export const PostDetails: React.FC<Props> = ({
           )}
         </div>
 
-        {commentFormOpened && <NewCommentForm />}
+        {commentFormOpened && (
+          <NewCommentForm
+            createComment={createComment}
+            selectedPost={selectedPost}
+            isSubmitting={isSubmitting}
+          />
+        )}
       </div>
     </div>
   );
