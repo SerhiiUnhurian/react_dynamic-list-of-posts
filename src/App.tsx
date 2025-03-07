@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { User } from './types/User';
 import { getUserPosts, getUsers } from './api/users';
 import { Post } from './types/Post';
-import { createAComment, getPostComments } from './api/comments';
+import { createAComment, deleteComment, getPostComments } from './api/comments';
 import { Comment, CommentData } from './types/Comment';
 
 export const App = () => {
@@ -28,7 +28,7 @@ export const App = () => {
 
   const [errorMessage, setErrorMessage] = useState('');
   const [postsError, setPostsError] = useState('');
-  const [commentsError, setCommentsError] = useState('');
+  // const [commentsError, setCommentsError] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -36,9 +36,8 @@ export const App = () => {
 
     getUsers()
       .then(setUsers)
-      .catch(error => {
+      .catch(() => {
         setErrorMessage('Unable to load users');
-        throw error;
       })
       .finally(() => {
         setLoading(false);
@@ -52,24 +51,23 @@ export const App = () => {
     if (selectedUser) {
       getUserPosts(selectedUser.id)
         .then(setUserPosts)
-        .catch(error => {
+        .catch(() => {
           setPostsError("Unable to load user's posts");
-          throw error;
         })
         .finally(() => setLoading(false));
     }
   }, [selectedUser]);
 
   useEffect(() => {
+    setErrorMessage('');
     setCommentsLoading(true);
     setCommentFormOpened(false);
 
     if (selectedPost !== null) {
       getPostComments(selectedPost.id)
         .then(setPostComments)
-        .catch(error => {
-          setCommentsError('Unable to load post commnets');
-          throw error;
+        .catch(() => {
+          setErrorMessage('Unable to load post comments');
         })
         .finally(() => {
           setCommentsLoading(false);
@@ -82,6 +80,7 @@ export const App = () => {
     newComment: CommentData,
   ): Promise<Comment> => {
     setIsSubmitting(true);
+    setErrorMessage('');
 
     return createAComment(postId, newComment)
       .then(createdComment => {
@@ -98,6 +97,21 @@ export const App = () => {
       .finally(() => {
         setIsSubmitting(false);
       });
+  };
+
+  const onDeleteComment = (commentId: number) => {
+    deleteComment(commentId)
+      .then(() => {
+        setPostComments(prevComments =>
+          prevComments
+            ? prevComments.filter(com => com.id !== commentId)
+            : null,
+        );
+      })
+      .catch(() => {
+        setErrorMessage('Unable to delete a comment');
+      })
+      .finally();
   };
 
   return (
@@ -161,11 +175,13 @@ export const App = () => {
                   selectedPost={selectedPost}
                   postComments={postComments}
                   commentsLoading={commentsLoading}
-                  commentsError={commentsError}
+                  // commentsError={commentsError}
                   commentFormOpened={commentFormOpened}
                   setCommentFormOpened={setCommentFormOpened}
                   createComment={createComment}
                   isSubmitting={isSubmitting}
+                  onDeleteComment={onDeleteComment}
+                  errorMessage={errorMessage}
                 />
               )}
             </div>

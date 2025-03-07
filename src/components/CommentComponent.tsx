@@ -3,10 +3,14 @@ import { Comment } from '../types/Comment';
 
 type Props = {
   comment: Comment;
+  onDeleteComment: (commentId: number) => void;
 };
 
-export const CommentComponent: React.FC<Props> = ({ comment }) => {
-  const { name, email, body } = comment;
+export const CommentComponent: React.FC<Props> = ({
+  comment,
+  onDeleteComment,
+}) => {
+  const { id, name, email, body } = comment;
 
   return (
     <article className="message is-small" data-cy="Comment">
@@ -19,6 +23,7 @@ export const CommentComponent: React.FC<Props> = ({ comment }) => {
           type="button"
           className="delete is-small"
           aria-label="delete"
+          onClick={() => onDeleteComment(id)}
         >
           delete button
         </button>
